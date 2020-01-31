@@ -1,0 +1,2 @@
+Files that could not be converted:
+exampleData/neige.xml-gid_deneigement.gidcircuitdeneigement

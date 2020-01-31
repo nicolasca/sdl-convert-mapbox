@@ -23,12 +23,12 @@ var type = 'vector';//vector, raster, GeoJSON ++
 //Comment out the one you don't want
 
 //add path for directory where all files you want to convert are placed
-var DIRECTORY_PATH = 'exampleMultipleLayers';
+// var DIRECTORY_PATH = 'exampleMultipleLayers';
 
-parseAllFiles(DIRECTORY_PATH); //parse all files in given directory
+// parseAllFiles(DIRECTORY_PATH); //parse all files in given directory
 
-var SPECIFIC_FILE_PATH = 'exampleData/FKB_ElvBekk.xml'; //path of specific file
-//parse_sld_to_rules_tag(SPECIFIC_FILE_PATH); //Parse only one file
+var SPECIFIC_FILE_PATH = 'exampleData/neige.xml'; //path of specific file
+parse_sld_to_rules_tag(SPECIFIC_FILE_PATH); //Parse only one file
 
 
 //-------------------------------------------------------------//
@@ -36,32 +36,32 @@ var SPECIFIC_FILE_PATH = 'exampleData/FKB_ElvBekk.xml'; //path of specific file
 var RESULT_PATH = ''; //Add path you want result files written to
 
 var VALID_SYMBOLIZERS = [
-  'LineSymbolizer',
-  'TextSymbolizer',
-  'PolygonSymbolizer',
-  'PointSymbolizer'
+  'se:LineSymbolizer',
+  'se:TextSymbolizer',
+  'se:PolygonSymbolizer',
+  'se:PointSymbolizer'
 ];
 
 var VALID_ATTR_TAGS = [
-  'Stroke',
-  'Fill',
-  'Label',
-  'Font',
-  'Halo',
-  'Mark',
-  'Size',
-  'Geometry',
-  'Graphic'
+  'se:Stroke',
+  'se:Fill',
+  'se:Label',
+  'se:Font',
+  'se:Halo',
+  'se:Mark',
+  'se:Size',
+  'se:Geometry',
+  'se:Graphic'
 ];
 //attribute-tags that must be handeled different than the rest
-var DIFF_ATTR_TAG = ['Label', 'Halo', 'Mark', 'Geometry', 'Graphic'];
+var DIFF_ATTR_TAG = ['se:Label', 'se:Halo', 'se:Mark', 'se:Geometry', 'se:Graphic'];
 
 //mapping from sld symbolizer til mapbox GL type-attribute
 var CONV_TYPE = {
-  'LineSymbolizer': 'line',
-  'PolygonSymbolizer': 'fill',
-  'TextSymbolizer': 'symbol',
-  'PointSymbolizer': 'symbol'
+  'se:LineSymbolizer': 'line',
+  'se:PolygonSymbolizer': 'fill',
+  'se:TextSymbolizer': 'symbol',
+  'se:PointSymbolizer': 'symbol'
 };
 
 //attributes that must be handeled different than the rest,
@@ -84,19 +84,19 @@ var LAYOUT_ATTR = [
 
 //mapping from sld to mapbox
 var CONVERT_ATTR_NAME = {
-    'stroke': 'line-color',
-    'stroke-width': 'line-width',
-    'stroke-dasharray': 'line-dasharray',
-    'stroke-linejoin': 'line-join',
-    'opacity': 'line-opacity',
-    'PolygonSymbolizer-Fill-fill': 'fill-color',
-    'PolygonSymbolizer-Fill-fill-opacity': 'fill-opacity',
-    'PolygonSymbolizer-Fill-opacity': 'fill-opacity',
-    'font-size': 'text-size',
-    'font-family': 'text-font',
-    'Label': 'text-field',
-    'TextSymbolizer-Halo-Fill-fill': 'text-halo-color',
-    'TextSymbolizer-Fill-fill': 'text-color'
+  'stroke': 'line-color',
+  'stroke-width': 'line-width',
+  'stroke-dasharray': 'line-dasharray',
+  'stroke-linejoin': 'line-join',
+  'opacity': 'line-opacity',
+  'PolygonSymbolizer-Fill-fill': 'fill-color',
+  'PolygonSymbolizer-Fill-fill-opacity': 'fill-opacity',
+  'PolygonSymbolizer-Fill-opacity': 'fill-opacity',
+  'font-size': 'text-size',
+  'font-family': 'text-font',
+  'Label': 'text-field',
+  'TextSymbolizer-Halo-Fill-fill': 'text-halo-color',
+  'TextSymbolizer-Fill-fill': 'text-color'
 };
 
 var PUNKT = 'circle-12'; //?
@@ -112,6 +112,12 @@ var CONV_ICON_IMG = {
 
 var FILES_WRITTEN = [];
 
+function printCallback(err) {
+  if (err) {
+    return console.log(err);
+  }
+  console.log("File saved successfully!");
+}
 
 //translate zoom-scale to zoom-level
 function scale_to_zoom(scale) {
@@ -223,25 +229,27 @@ function parse_sld_to_rules_tag(file) {
 function writeStartOfJSON() {
   var top = '{ "version": 7, "name": "' + styleSpecName + '", "sources": { "' + sourceName + '": { "type": "vector", "url": "' + sourceUrl + '" } }, "glyphs": "mapbox://fontstack/{fontstack}/{range}.pbf", "sprite": "https://www.mapbox.com/mapbox-gl-styles/sprites/sprite", "layers": [ { "id": "background", "type": "background", "paint": { "background-color": "rgb(237, 234, 235)" } }';
   //  var top = '{ "version": 7, "name": "MapboxGLStyle2", "sources": { "norkart": { "type": "vector", "url": "mapbox://andersob.3ukdquxr" } }, "glyphs": "mapbox://fontstack/{fontstack}/{range}.pbf", "sprite": "https://www.mapbox.com/mapbox-gl-styles/sprites/sprite", "layers": [ { "id": "background", "type": "background", "paint": { "background-color": "rgb(237, 234, 235)" } }';
-  fs.writeFile(RESULT_PATH + '\\Result.JSON', top + '\n');
-  fs.writeFile(RESULT_PATH + '\\errorFiles.txt', 'Files that could not be converted:' + '\n');
+  fs.writeFileSync(RESULT_PATH + '\\Result.JSON', top + '\n');
+  fs.writeFileSync(RESULT_PATH + '\\errorFiles.txt', 'Files that could not be converted:' + '\n');
 }
 
 function writeEndOfJSON() {
   console.log('writing end of json');
   var end = ']}';
-  fs.appendFile(RESULT_PATH + '\\Result.JSON', end);
+  fs.appendFileSync(RESULT_PATH + '\\Result.JSON', end);
 }
 
 var parseFile = function (data, file) {
   writeStartOfJSON();
+  console.log('created')
   parser.parseString(data, function (err, result) {
-    var FeatureTypeStyle = result.StyledLayerDescriptor.NamedLayer[0].UserStyle[0].FeatureTypeStyle;
+    var FeatureTypeStyle = result.StyledLayerDescriptor['NamedLayer'][0].UserStyle[0]['se:FeatureTypeStyle'];
+
     var rulesArr = [];
     var k;
     var rules = [];
     for (k = 0; k < FeatureTypeStyle.length; k++) { //some files had more than one FeatureTypeStyle
-      var rulesVer = (FeatureTypeStyle[k].Rule);
+      var rulesVer = (FeatureTypeStyle[k]['se:Rule']);
       var rule;
       for (rule = 0; rule < rulesVer.length; rule++) {
         //pushes all rules-tag in different FeatureTypeStyle-tags to one array
@@ -253,14 +261,18 @@ var parseFile = function (data, file) {
     var minzoom;
     for (j = 0; j < rules.length; j++) {
       rule = rules[j];
-      name = rule.Name[0];
-      maxzoom = scale_to_zoom(rule.MaxScaleDenominator[0]);
-      minzoom = scale_to_zoom(rule.MinScaleDenominator[0]);
+      name = rule['se:Name'][0];
+      if (rule.MaxScaleDenominator)
+        maxzoom = scale_to_zoom(rule.MaxScaleDenominator[0]);
+      if (rule.MinScaleDenominator)
+        minzoom = scale_to_zoom(rule.MinScaleDenominator[0]);
       //Checks if the tag is valid, and if it is: saves the object and type-name
       var i;
       var ruleArray = Object.keys(rule);
+
       for (i = 0; i < ruleArray.length; i++) {
         if ((VALID_SYMBOLIZERS.indexOf(ruleArray[i])) > -1) {
+
           //Sends object, symbolizer and filename
           writeJSON(rule[ruleArray[i]], ruleArray[i], name, minzoom, maxzoom, file);
         }
@@ -277,6 +289,8 @@ function writeJSON(symbTag, type, name, minzoom, maxzoom, file) {
   var convType = convertType(type);
   try {
     var cssObj = getSymbolizersObj(symbTag, type, file);
+    console.log(cssObj);
+
     //if css-obj contains both fill and stroke, you have to split them into two layers
     if (cssObj['fill-color'] !== undefined && cssObj['line-color'] !== undefined) {
       var attPos = (Object.keys(cssObj)).indexOf('line-color');
@@ -294,16 +308,18 @@ function writeJSON(symbTag, type, name, minzoom, maxzoom, file) {
       var print1 = JSON.stringify(styleObj1, null, 4);
       var print2 = JSON.stringify(styleObj2, null, 4);
       console.log('Writing converted');
-      fs.appendFile(RESULT_PATH + '\\Result.JSON', ',\n' + print1);
-      fs.appendFile(RESULT_PATH + '\\Result.JSON', ',\n' + print2);
+      fs.appendFile(RESULT_PATH + '\\Result.JSON', ',\n' + print1, printCallback);
+      fs.appendFile(RESULT_PATH + '\\Result.JSON', ',\n' + print2, printCallback);
     } else {
       var styleObj = make_JSON(name, convType, cssObj, minzoom, maxzoom);
       print = JSON.stringify(styleObj, null, 4);
-      fs.appendFile(RESULT_PATH + '\\Result.JSON', ',\n' + print);
+      console.log(print);
+
+      fs.appendFile(RESULT_PATH + '\\Result.JSON', ',\n' + print, printCallback);
     }
   } catch (err) {
     //writes a file with all the sld-files with errors
-    fs.appendFile(RESULT_PATH + '\\errorFiles.txt', file + '-' + name + '\n');
+    fs.appendFile(RESULT_PATH + '\\errorFiles.txt', file + '-' + name + '\n', printCallback);
   }
 }
 
@@ -346,9 +362,9 @@ function getSymbolizersObj(symbTag, type, file) {
     var tagName = Object.keys(symbTag[0])[i];
     if (VALID_ATTR_TAGS.indexOf(tagName) > -1) {  //if tag exists in valid-array, eks Stroke
 
-       //if values are not in the regular place
+      //if values are not in the regular place
       if (DIFF_ATTR_TAG.indexOf(tagName) > -1 ||
-          ((tagName === 'Fill') && symbTag[0].Fill[0].GraphicFill !== undefined)) {
+        ((tagName === 'se:Fill') && symbTag[0]['se:Fill'][0]['se:GraphicFill'] !== undefined)) {
         var obj = getObjFromDiffAttr(tagName, type, symbTag, file);
         for (var key in obj) {
           cssObj[key] = obj[key];
@@ -390,15 +406,15 @@ function getCssParameters(symbTag, validAttrTag, type, outerTag) {
 //a different method the get the css-value
 function getObjFromDiffAttr(tagName, type, symbTag, file) {
   var obj = {};
-  if (tagName === 'Label') {
+  if (tagName === 'se:Label') {
     obj = getLabelObj(tagName, type, symbTag, obj);
-  } else if (tagName === 'Fill') { //some fill-attributes are defined differently than the rest
+  } else if (tagName === 'se:Fill') { //some fill-attributes are defined differently than the rest
     obj['fill-image'] = 'SPRITE-NAME';
   } else if (tagName === 'Halo') {
     obj = getHaloObj(tagName, type, symbTag, obj);
-  } else if (tagName === 'Geometry') {
+  } else if (tagName === 'se:Geometry') {
     obj = getGeometryObj(symbTag, obj);
-  } else if (tagName === 'Graphic') {
+  } else if (tagName === 'se:Graphic') {
     obj = getGraphicObj(file, symbTag, type, obj);
   }
   return obj;
@@ -443,23 +459,28 @@ function getGeometryObj(symbTag, obj) {
 function getGraphicObj(file, symbTag, type, obj) {
   var fillColor;
   try {
-    fillColor = symbTag[0].Graphic[0].Mark[0].Fill[0].CssParameter[0]['ogc:Function'][0]['ogc:Literal'][1];
-    var color = '#' + fillColor;
+    fillColor = symbTag[0]['se:Graphic'][0]['se:Mark'][0]['se:Fill'][0]['se:SvgParameter'][0]['_'];
+    console.log(fillColor);
+
+    obj['icon-color'] = fillColor;
+
     var regInteger = /^\d+$/;
-    if (!regInteger.test(fillColor)) {
-      //console.log('Different graphic tag: '+fillColor+ ' from file: '+ file);
-    } else {
-      obj['icon-color'] = color;
-    }
+    // if (!regInteger.test(fillColor)) {
+    //   //console.log('Different graphic tag: '+fillColor+ ' from file: '+ file);
+    // } else {
+    //   console.log(color);
+
+    //   obj['icon-color'] = color;
+    // }
   } catch (err) {
     console.log('Could not set fill color for graphic tag in file: ' + file);
   }
   //Sets size
   try {
-    var size = symbTag[0].Graphic[0].Size[0];
-      obj['icon-size'] = parseInt(size, 10);
+    var size = symbTag[0]['se:Graphic'][0]['se:Size'][0];
+    obj['icon-size'] = parseInt(size, 10);
   } catch (err) {
-      console.log('Size does not exist in this graphic-tag');
+    console.log('Size does not exist in this graphic-tag');
   }
   var img = getIconImage(file);
   if (img !== undefined) {
@@ -497,7 +518,7 @@ function convert_css_parameter(cssTag, ValidAttrTag, type, outerTag) {
       && !(regInt.test(cssTag['_']))
       && !(regDouble.test(cssTag['_']))
       && !regLetters.test(cssColorValue)
-      && !regNumbers.test(cssColorValue) ) {//Check if different type of attribute
+      && !regNumbers.test(cssColorValue)) {//Check if different type of attribute
       cssValue = (cssTag['ogc:Function'][0]['ogc:Literal'][1]);
     } else {
       cssValue = cssTag['_'];

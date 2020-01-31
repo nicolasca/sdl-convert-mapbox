@@ -1,0 +1,19 @@
+{
+  "version": 7,
+  "name": "MapboxGLStyle2",
+  "sources": {
+    "": {
+      "type": "vector",
+      "url": ""
+    }
+  },
+  "glyphs": "mapbox://fontstack/{fontstack}/{range}.pbf",
+  "sprite": "https://www.mapbox.com/mapbox-gl-styles/sprites/sprite",
+  "layers": [{
+    "id": "background",
+    "type": "background",
+    "paint": {
+      "background-color": "rgb(237, 234, 235)"
+    }
+  }]
+}
